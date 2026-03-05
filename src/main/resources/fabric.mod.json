@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "quicktrigger",
+  "version": "1.0.0",
+  "name": "QuickTrigger",
+  "description": "Adds a Spawn button in the inventory that sends /trigger spawn automatically.",
+  "authors": ["You"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.quicktrigger.QuickTrigger"
+    ],
+    "client": [
+      "com.quicktrigger.QuickTriggerClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21.11",
+    "java": ">=21"
+  }
+}
