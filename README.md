@@ -1,99 +1,94 @@
 # QuickTrigger
 
-Un mod Fabric qui ajoute des boutons de téléportation rapide directement dans l'inventaire Minecraft.
+A Fabric mod that adds quick teleportation buttons directly into the Minecraft inventory, designed to work with the **VanillaTweaks Home & Spawn datapacks**.
 
 ---
 
-## Fonctionnalités
+## Features
 
-### Bouton Spawn
-Un bouton boussole au-dessus de l'inventaire pour se téléporter instantanément au spawn du serveur.
+### Spawn Button
+A compass button displayed above the inventory to instantly teleport to the server spawn.
 
-### Boutons Home
-Jusqu'à **4 maisons** accessibles en un clic, colorées selon le rang :
+### Home Buttons
+Up to **4 homes** accessible with a single click, color-coded by rank:
 
-| # | Couleur | Rôle requis | Commande |
-|---|---------|-------------|----------|
-| Home #1 | 🔵 Bleu | Tous les joueurs | `/trigger home` |
-| Home #2 | 🟢 Vert | Mineur | `/trigger home set 2` |
-| Home #3 | 🟠 Orange | Architecte | `/trigger home set 3` |
-| Home #4 | 🟣 Violet | Dragon | `/trigger home set 4` |
+| # | Color | Required Role | Command |
+|---|-------|---------------|---------|
+| Home #1 | 🔵 Blue | All players | `/trigger home` |
+| Home #2 | 🟢 Green | Miner | `/trigger home set 2` |
+| Home #3 | 🟠 Orange | Architect | `/trigger home set 3` |
+| Home #4 | 🟣 Purple | Dragon | `/trigger home set 4` |
 
-Les maisons verrouillées s'affichent en **lit gris** avec un tooltip indiquant le rôle Discord requis pour les débloquer.
+Locked homes are displayed as a **gray bed** with a tooltip indicating the Discord role required to unlock them.
 
 ---
 
 ## Installation
 
-### Prérequis
+### Requirements
 - Minecraft **1.21.11**
 - [Fabric Loader](https://fabricmc.net/) **≥ 0.18.0**
 - [Fabric API](https://modrinth.com/mod/fabric-api) **0.139.x+1.21.11**
+- [VanillaTweaks](https://vanillatweaks.net/) — Homes & Spawn datapacks
 
-### Côté client
-Copier `quicktrigger-1.0.0.jar` dans le dossier `mods/` de votre installation Minecraft.
+### Client side
+Copy `quicktrigger-1.0.0.jar` into your Minecraft `mods/` folder.
 
-### Côté serveur
-Copier le **même `.jar`** dans le dossier `mods/` du serveur Fabric.
+### Server side
+Copy the **same `.jar`** into the Fabric server `mods/` folder.
 
-> Le mod est **optionnel côté client** — les joueurs sans le mod jouent normalement, ils n'ont simplement pas les boutons dans l'inventaire.
+> The mod is **optional on the client** — players without the mod can still play normally, they just won't see the buttons in their inventory.
 
 ---
 
-## Configuration serveur
+## Server Configuration
 
 ### Scoreboard `homes.limit`
-Le serveur envoie automatiquement le nombre de maisons disponibles à chaque joueur via un canal custom (`quicktrigger:data`).
+The server automatically sends each player's home limit on join via a custom channel (`quicktrigger:data`).
 
-Créer l'objectif et définir la limite par joueur :
+Create the objective and set the limit per player:
 ```
 /scoreboard objectives add homes.limit dummy
-/scoreboard players set <joueur> homes.limit <valeur>
+/scoreboard players set <player> homes.limit <value>
 ```
 
-Valeurs possibles : `1` (défaut), `2`, `3`, `4`.
+Accepted values: `1` (default), `2`, `3`, `4`.
 
-### Triggers requis
-Le mod envoie des commandes `/trigger` — les objectifs doivent exister sur le serveur :
-```
-/scoreboard objectives add spawn trigger
-/scoreboard objectives add home trigger
-```
-
-Un datapack ou plugin doit ensuite écouter ces triggers pour effectuer les téléportations.
+### Required Triggers
+The mod sends `/trigger` commands — the VanillaTweaks datapacks handle the actual teleportation logic.
 
 ---
 
-## Build
+## Building
 
-### Prérequis
+### Requirements
 - Java **21**
-- Gradle (inclus via le wrapper)
+- Gradle (included via wrapper)
 
 ```bash
 ./gradlew build
 ```
 
-Le `.jar` final se trouve dans `build/libs/quicktrigger-1.0.0.jar`.
+The final `.jar` is located at `build/libs/quicktrigger-1.0.0.jar`.
 
 ---
 
-## Compatibilité
+## Compatibility
 
-| Environnement | Supporté |
-|---------------|----------|
-| Client seul (singleplayer) | ✅ |
-| Client sur serveur Fabric | ✅ (avec envoi de `homes.limit`) |
-| Client sur serveur Fabric (sans mod serveur) | ✅ (1 home par défaut) |
-| Client vanilla sur serveur Fabric | ✅ (mod ignoré) |
+| Environment | Supported |
+|-------------|-----------|
+| Client only (singleplayer) | ✅ |
+| Client on Fabric server (with server mod) | ✅ |
+| Client on Fabric server (without server mod) | ✅ (1 home slot by default) |
+| Vanilla client on Fabric server | ✅ (mod safely ignored) |
 
 ---
 
-## Structure du projet
+## Project Structure
 
 ```
 src/main/java/com/quicktrigger/
-├── QuickTrigger.java          # Entrypoint serveur — envoie homes.limit au JOIN
-├── QuickTriggerClient.java    # Entrypoint client — affiche les boutons
-└── QuickTriggerPayloads.java  # Payload partagé pour le canal custom S2C
+├── QuickTrigger.java          # Server entrypoint — sends homes.limit on player JOIN
+├── QuickTriggerClient.java    # Client entrypoint — renders the inventory buttons
+└── QuickTriggerPayloads.java  # Shared payload for the custom S2C channel
 ```
