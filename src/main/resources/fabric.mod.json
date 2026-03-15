@@ -6,6 +6,7 @@
   "description": "Adds a Spawn button in the inventory that sends /trigger spawn automatically.",
   "authors": ["You"],
   "license": "MIT",
+  "icon": "assets/quicktrigger/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -13,7 +14,13 @@
     ],
     "client": [
       "com.quicktrigger.QuickTriggerClient"
+    ],
+    "modmenu": [
+      "com.quicktrigger.ModMenuIntegration"
     ]
+  },
+  "suggests": {
+    "modmenu": "*"
   },
   "depends": {
     "fabricloader": ">=0.18.0",
