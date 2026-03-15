@@ -1,5 +1,6 @@
 package com.quicktrigger;
 
+import com.google.gson.Gson;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -13,8 +14,12 @@ import net.minecraft.world.scores.Scoreboard;
 
 public class QuickTrigger implements ModInitializer {
 
+    private static final Gson GSON = new Gson();
+
     @Override
     public void onInitialize() {
+        QuickTriggerServerConfig.INSTANCE.load();
+
         PayloadTypeRegistry.playS2C().register(
             QuickTriggerPayloads.HomeLimitPayload.TYPE,
             QuickTriggerPayloads.HomeLimitPayload.CODEC
@@ -28,6 +33,8 @@ public class QuickTrigger implements ModInitializer {
     private static void trySend(ServerPlayer player, MinecraftServer server) {
         if (!ServerPlayNetworking.canSend(player, QuickTriggerPayloads.HomeLimitPayload.TYPE)) return;
 
+        QuickTriggerServerConfig cfg = QuickTriggerServerConfig.INSTANCE;
+
         Scoreboard scoreboard = server.getScoreboard();
         Objective objective = scoreboard.getObjective("homes.limit");
         if (objective == null) return;
@@ -36,6 +43,13 @@ public class QuickTrigger implements ModInitializer {
         ReadOnlyScoreInfo scoreInfo = scoreboard.getPlayerScoreInfo(holder, objective);
         if (scoreInfo == null) return;
 
-        ServerPlayNetworking.send(player, new QuickTriggerPayloads.HomeLimitPayload(scoreInfo.value()));
+        int playerLimit = Math.min(scoreInfo.value(), cfg.maxHomes);
+        String lockMessagesJson = GSON.toJson(cfg.lockMessages);
+
+        ServerPlayNetworking.send(player, new QuickTriggerPayloads.HomeLimitPayload(
+            playerLimit,
+            cfg.maxHomes,
+            lockMessagesJson
+        ));
     }
 }
