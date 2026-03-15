@@ -1,5 +1,7 @@
 package com.quicktrigger;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -14,41 +16,58 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
+import java.util.List;
 
 public class QuickTriggerClient implements ClientModInitializer {
 
-    private static final ItemStack[] BED_ICONS = {
-        new ItemStack(Items.BLUE_BED),
-        new ItemStack(Items.GREEN_BED),
-        new ItemStack(Items.ORANGE_BED),
-        new ItemStack(Items.PURPLE_BED)
-    };
+    private static final Gson GSON = new Gson();
 
     private static final Component[] HOME_TOOLTIPS = {
         Component.literal("Home #1"),
         Component.literal("Home #2"),
         Component.literal("Home #3"),
-        Component.literal("Home #4")
+        Component.literal("Home #4"),
+        Component.literal("Home #5"),
+        Component.literal("Home #6"),
+        Component.literal("Home #7"),
+        Component.literal("Home #8"),
+        Component.literal("Home #9"),
     };
 
-    private static final Component[] LOCK_TOOLTIPS = {
-        null,
-        Component.literal("Obtenez le rôle Mineur sur Discord"),
-        Component.literal("Obtenez le rôle Architecte sur Discord"),
-        Component.literal("Obtenez le rôle Dragon sur Discord")
-    };
-
-    private static volatile int homesLimit = 1;
+    // État reçu du serveur (package-visible pour ConfigScreen)
+    static volatile boolean serverHasMod = false;
+    static volatile int maxHomes = 1;
+    private static volatile int playerLimit = 1;
+    private static volatile String[] lockMessages = new String[9];
 
     @Override
     public void onInitializeClient() {
+        QuickTriggerConfig.INSTANCE.load();
 
         ClientPlayNetworking.registerGlobalReceiver(
             QuickTriggerPayloads.HomeLimitPayload.TYPE,
-            (payload, ctx) -> homesLimit = Math.min(payload.limit(), 4)
+            (payload, ctx) -> {
+                serverHasMod = true;
+                playerLimit = payload.playerLimit();
+                maxHomes = payload.maxHomes();
+                List<String> msgs = GSON.fromJson(
+                    payload.lockMessagesJson(),
+                    new TypeToken<List<String>>() {}.getType()
+                );
+                String[] arr = new String[8];
+                for (int i = 0; i < 8; i++) {
+                    arr[i] = (msgs != null && i < msgs.size() && msgs.get(i) != null) ? msgs.get(i) : "";
+                }
+                lockMessages = arr;
+            }
         );
 
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> homesLimit = 1);
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            serverHasMod = false;
+            playerLimit = 1;
+            maxHomes = 1;
+            lockMessages = new String[8];
+        });
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             if (!(screen instanceof InventoryScreen)) return;
@@ -68,24 +87,52 @@ public class QuickTriggerClient implements ClientModInitializer {
                 }
             ));
 
-            // 4 boutons Home — toujours affichés
-            int limit = homesLimit;
-            for (int i = 0; i < 4; i++) {
+            // Bouton Home #1 (toujours présent)
+            Screens.getButtons(screen).add(new ItemButton(
+                bgX + 26, bgY - 20,
+                QuickTriggerConfig.INSTANCE.getItemStack(0),
+                HOME_TOOLTIPS[0],
+                () -> {
+                    client.setScreen(null);
+                    if (client.getConnection() != null)
+                        client.getConnection().sendCommand("trigger home");
+                }
+            ));
+
+            // Slots supplémentaires — uniquement si le serveur a le mod
+            if (!serverHasMod) return;
+
+            int limit = playerLimit;
+            int total = maxHomes;
+            String[] msgs = lockMessages;
+
+            for (int i = 1; i < total; i++) {
                 final int index = i;
                 boolean available = index < limit;
 
-                ItemStack icon = available ? BED_ICONS[index] : new ItemStack(Items.GRAY_BED);
-                Component tooltip = available ? HOME_TOOLTIPS[index] : LOCK_TOOLTIPS[index];
+                ItemStack icon = available
+                    ? QuickTriggerConfig.INSTANCE.getItemStack(index)
+                    : new ItemStack(Items.GRAY_BED);
+
+                Component tooltip;
+                if (available) {
+                    tooltip = index < HOME_TOOLTIPS.length ? HOME_TOOLTIPS[index] : Component.literal("Home #" + (index + 1));
+                } else {
+                    // index 1 → msgs[0], index 2 → msgs[1], …
+                    int msgIdx = index - 1;
+                    String msg = (msgIdx < msgs.length && msgs[msgIdx] != null && !msgs[msgIdx].isEmpty())
+                        ? msgs[msgIdx] : null;
+                    tooltip = msg != null ? Component.literal(msg) : null;
+                }
+
                 Runnable action = available ? () -> {
                     client.setScreen(null);
-                    if (client.getConnection() != null) {
-                        String cmd = index == 0 ? "trigger home" : "trigger home set " + (index + 1);
-                        client.getConnection().sendCommand(cmd);
-                    }
+                    if (client.getConnection() != null)
+                        client.getConnection().sendCommand("trigger home set " + (index + 1));
                 } : null;
 
                 Screens.getButtons(screen).add(new ItemButton(
-                    bgX + 25 + (index * 19), bgY - 20,
+                    bgX + 26 + (index * 19), bgY - 20,
                     icon, tooltip, action
                 ));
             }
