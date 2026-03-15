@@ -7,19 +7,17 @@ A Fabric mod that adds quick teleportation buttons directly into the Minecraft i
 ## Features
 
 ### Spawn Button
-A compass button displayed above the inventory to instantly teleport to the server spawn.
+A compass button displayed above the inventory to instantly send `/trigger spawn`.
 
 ### Home Buttons
-Up to **4 homes** accessible with a single click, color-coded by rank:
+Up to **9 homes** accessible with a single click, displayed above the inventory.
 
-| # | Color | Required Role | Command |
-|---|-------|---------------|---------|
-| Home #1 | 🔵 Blue | All players | `/trigger home` |
-| Home #2 | 🟢 Green | Miner | `/trigger home set 2` |
-| Home #3 | 🟠 Orange | Architect | `/trigger home set 3` |
-| Home #4 | 🟣 Purple | Dragon | `/trigger home set 4` |
+- **Unlocked slots** — colored bed (color configurable per player via Mod Menu)
+- **Locked slots** — gray bed with a tooltip message configurable by the server admin
+- **No server mod** — only Home #1 is shown (no gray beds)
 
-Locked homes are displayed as a **gray bed** with a tooltip indicating the Discord role required to unlock them.
+### Color Configuration (Mod Menu)
+If [Mod Menu](https://modrinth.com/mod/modmenu) is installed, a **Config** button appears on QuickTrigger's entry. It opens a screen where each player can choose the bed color for each of their home slots. Colors are saved client-side in `config/quicktrigger.json`.
 
 ---
 
@@ -28,48 +26,96 @@ Locked homes are displayed as a **gray bed** with a tooltip indicating the Disco
 ### Requirements
 - Minecraft **1.21.11**
 - [Fabric Loader](https://fabricmc.net/) **≥ 0.18.0**
-- [Fabric API](https://modrinth.com/mod/fabric-api) **0.139.x+1.21.11**
-- [VanillaTweaks](https://vanillatweaks.net/) — Homes & Spawn datapacks
+- [Fabric API](https://modrinth.com/mod/fabric-api)
+- [VanillaTweaks](https://vanillatweaks.net/) — Homes & Spawn datapacks (server-side)
+- [Mod Menu](https://modrinth.com/mod/modmenu) *(optional — enables the config screen)*
 
-### Client side
-Copy `quicktrigger-1.0.0.jar` into your Minecraft `mods/` folder.
+### Client
+Drop `quicktrigger-x.x.x.jar` into your `mods/` folder.
 
-### Server side
-Copy the **same `.jar`** into the Fabric server `mods/` folder.
+> Players without the mod can still play normally — they just won't see the buttons.
 
-> The mod is **optional on the client** — players without the mod can still play normally, they just won't see the buttons in their inventory.
+### Server
+Drop the **same `.jar`** into the Fabric server `mods/` folder.
+
+> The server mod is optional. Without it, clients fall back to showing only Home #1.
 
 ---
 
 ## Server Configuration
 
-### Scoreboard `homes.limit`
-The server automatically sends each player's home limit on join via a custom channel (`quicktrigger:data`).
+On first launch, the file `config/quicktrigger-server.json` is generated automatically:
 
-Create the objective and set the limit per player:
+```json
+{
+  "maxHomes": 1,
+  "lockMessages": [
+    "Unlock slot #2",
+    "Unlock slot #3",
+    "Unlock slot #4",
+    "Unlock slot #5",
+    "Unlock slot #6",
+    "Unlock slot #7",
+    "Unlock slot #8",
+    "Unlock slot #9"
+  ]
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `maxHomes` | Total number of home slots shown to all players (1–9) |
+| `lockMessages[0]` | Tooltip on the gray bed for slot #2 |
+| `lockMessages[1]` | Tooltip on the gray bed for slot #3 |
+| … | … |
+| `lockMessages[7]` | Tooltip on the gray bed for slot #9 |
+
+Changes require a **server restart** to take effect.
+
+### Scoreboard `homes.limit`
+The server reads each player's personal limit from the scoreboard on join and sends it to the client via a custom S2C packet (`quicktrigger:data`).
+
 ```
 /scoreboard objectives add homes.limit dummy
 /scoreboard players set <player> homes.limit <value>
 ```
 
-Accepted values: `1` (default), `2`, `3`, `4`.
+- Accepted values: `1` to `maxHomes`
+- Slots `1` to `playerLimit` → unlocked (colored bed)
+- Slots `playerLimit + 1` to `maxHomes` → locked (gray bed with tooltip)
 
-### Required Triggers
-The mod sends `/trigger` commands — the VanillaTweaks datapacks handle the actual teleportation logic.
+---
+
+## Client Configuration
+
+Each player can choose a bed color per home slot via **Mod Menu → QuickTrigger → Config**.
+
+- Config saved in `.minecraft/config/quicktrigger.json`
+- 16 available colors (all vanilla Minecraft bed colors)
+- Color names are displayed in the player's game language
+- The config screen shows exactly as many rows as `maxHomes` from the server (or 1 if offline)
+
+---
+
+## Behavior Summary
+
+| Situation | Inventory display |
+|-----------|-------------------|
+| No server mod | Spawn + Home #1 only |
+| Server mod, `playerLimit = 2`, `maxHomes = 4` | Spawn + 2 colored homes + 2 gray beds |
+| Server mod, `playerLimit = maxHomes` | Spawn + all homes colored, no gray beds |
 
 ---
 
 ## Building
 
-### Requirements
-- Java **21**
-- Gradle (included via wrapper)
-
 ```bash
 ./gradlew build
 ```
 
-The final `.jar` is located at `build/libs/quicktrigger-1.0.0.jar`.
+Output: `build/libs/quicktrigger-x.x.x.jar`
+
+Requires Java 21.
 
 ---
 
@@ -77,10 +123,10 @@ The final `.jar` is located at `build/libs/quicktrigger-1.0.0.jar`.
 
 | Environment | Supported |
 |-------------|-----------|
-| Client only (singleplayer) | ✅ |
-| Client on Fabric server (with server mod) | ✅ |
-| Client on Fabric server (without server mod) | ✅ (1 home slot by default) |
-| Vanilla client on Fabric server | ✅ (mod safely ignored) |
+| Client only | ✅ (1 home slot) |
+| Client + server mod | ✅ (full feature set) |
+| Client without server mod | ✅ (graceful fallback) |
+| Vanilla client on modded server | ✅ (mod safely ignored) |
 
 ---
 
@@ -88,7 +134,11 @@ The final `.jar` is located at `build/libs/quicktrigger-1.0.0.jar`.
 
 ```
 src/main/java/com/quicktrigger/
-├── QuickTrigger.java          # Server entrypoint — sends homes.limit on player JOIN
-├── QuickTriggerClient.java    # Client entrypoint — renders the inventory buttons
-└── QuickTriggerPayloads.java  # Shared payload for the custom S2C channel
+├── QuickTrigger.java             # Server entrypoint — loads server config, sends payload on JOIN
+├── QuickTriggerClient.java       # Client entrypoint — renders inventory buttons
+├── QuickTriggerPayloads.java     # S2C packet: playerLimit + maxHomes + lockMessages (JSON)
+├── QuickTriggerConfig.java       # Client config — bed colors per slot (quicktrigger.json)
+├── QuickTriggerServerConfig.java # Server config — maxHomes + lockMessages (quicktrigger-server.json)
+├── ConfigScreen.java             # Mod Menu config screen — CycleButton per home slot
+└── ModMenuIntegration.java       # Mod Menu bridge — registers ConfigScreen as config factory
 ```
