@@ -41,9 +41,7 @@ public class QuickTrigger implements ModInitializer {
 
         ScoreHolder holder = ScoreHolder.forNameOnly(player.getScoreboardName());
         ReadOnlyScoreInfo scoreInfo = scoreboard.getPlayerScoreInfo(holder, objective);
-        if (scoreInfo == null) return;
-
-        int playerLimit = Math.min(scoreInfo.value(), cfg.maxHomes);
+        int playerLimit = scoreInfo != null ? Math.min(scoreInfo.value(), cfg.maxHomes) : 1;
         String lockMessagesJson = GSON.toJson(cfg.lockMessages);
 
         ServerPlayNetworking.send(player, new QuickTriggerPayloads.HomeLimitPayload(

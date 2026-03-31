@@ -83,6 +83,7 @@ The server reads each player's personal limit from the scoreboard on join and se
 - Accepted values: `1` to `maxHomes`
 - Slots `1` to `playerLimit` → unlocked (colored bed)
 - Slots `playerLimit + 1` to `maxHomes` → locked (gray bed with tooltip)
+- Players with **no score set** default to `playerLimit = 1` (slot 1 unlocked, rest locked)
 
 ---
 
