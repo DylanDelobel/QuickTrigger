@@ -20,7 +20,7 @@ public class QuickTrigger implements ModInitializer {
     public void onInitialize() {
         QuickTriggerServerConfig.INSTANCE.load();
 
-        PayloadTypeRegistry.playS2C().register(
+        PayloadTypeRegistry.clientboundPlay().register(
             QuickTriggerPayloads.HomeLimitPayload.TYPE,
             QuickTriggerPayloads.HomeLimitPayload.CODEC
         );

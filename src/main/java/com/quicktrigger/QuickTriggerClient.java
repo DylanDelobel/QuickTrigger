@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -76,7 +76,7 @@ public class QuickTriggerClient implements ClientModInitializer {
             int bgY = (scaledHeight - 166) / 2;
 
             // Bouton Spawn
-            Screens.getButtons(screen).add(new ItemButton(
+            Screens.getWidgets(screen).add(new ItemButton(
                 bgX + 7, bgY - 20,
                 new ItemStack(Items.COMPASS),
                 Component.literal("Spawn"),
@@ -88,7 +88,7 @@ public class QuickTriggerClient implements ClientModInitializer {
             ));
 
             // Bouton Home #1 (toujours présent)
-            Screens.getButtons(screen).add(new ItemButton(
+            Screens.getWidgets(screen).add(new ItemButton(
                 bgX + 26, bgY - 20,
                 QuickTriggerConfig.INSTANCE.getItemStack(0),
                 HOME_TOOLTIPS[0],
@@ -131,7 +131,7 @@ public class QuickTriggerClient implements ClientModInitializer {
                         client.getConnection().sendCommand("trigger home set " + (index + 1));
                 } : null;
 
-                Screens.getButtons(screen).add(new ItemButton(
+                Screens.getWidgets(screen).add(new ItemButton(
                     bgX + 26 + (index * 19), bgY - 20,
                     icon, tooltip, action
                 ));
@@ -157,14 +157,14 @@ public class QuickTriggerClient implements ClientModInitializer {
         }
 
         @Override
-        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
             int x = getX(), y = getY();
             graphics.fill(x, y, x + 18, y + 18, isHovered() ? 0x80555555 : 0x50252525);
             graphics.fill(x,      y,      x + 18, y + 1,  0x55FFFFFF);
             graphics.fill(x,      y + 17, x + 18, y + 18, 0x55FFFFFF);
             graphics.fill(x,      y,      x + 1,  y + 18, 0x55FFFFFF);
             graphics.fill(x + 17, y,      x + 18, y + 18, 0x55FFFFFF);
-            graphics.renderItem(icon, x + 1, y + 1);
+            graphics.item(icon, x + 1, y + 1);
 
             if (isHovered() && tooltip != null) {
                 graphics.setTooltipForNextFrame(tooltip, mouseX, mouseY);

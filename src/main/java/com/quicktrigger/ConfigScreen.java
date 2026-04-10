@@ -1,6 +1,6 @@
 package com.quicktrigger;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
@@ -82,16 +82,16 @@ public class ConfigScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        super.render(graphics, mouseX, mouseY, delta);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
+        graphics.centeredText(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
 
         int iconX = blockStartX + BTN_WIDTH + GAP;
 
         for (int i = 0; i < rowCount; i++) {
             int rowY = startY + i * ROW_HEIGHT;
             QuickTriggerConfig.BedColor color = QuickTriggerConfig.BedColor.fromName(pendingColors[i]);
-            graphics.renderItem(new ItemStack(color.item), iconX, rowY + (BTN_HEIGHT - ICON_SIZE) / 2);
+            graphics.item(new ItemStack(color.item), iconX, rowY + (BTN_HEIGHT - ICON_SIZE) / 2);
         }
     }
 
