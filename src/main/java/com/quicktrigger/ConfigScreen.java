@@ -24,6 +24,8 @@ public class ConfigScreen extends Screen {
     private int blockStartX;
     private int startY;
     private int rowCount;
+    // Pre-built to avoid NPE when item components are not yet bound (main menu)
+    private ItemStack[] iconStacks;
 
     public ConfigScreen(Screen parent) {
         super(Component.literal("QuickTrigger — Configuration"));
@@ -37,6 +39,11 @@ public class ConfigScreen extends Screen {
         rowCount = QuickTriggerClient.maxHomes;
         blockStartX = centerX - TOTAL_WIDTH / 2;
         startY = this.height / 2 - (rowCount * ROW_HEIGHT) / 2 - 20;
+
+        iconStacks = new ItemStack[rowCount];
+        for (int i = 0; i < rowCount; i++) {
+            iconStacks[i] = safeStack(QuickTriggerConfig.BedColor.fromName(pendingColors[i]));
+        }
 
         for (int i = 0; i < rowCount; i++) {
             final int index = i;
@@ -52,7 +59,10 @@ public class ConfigScreen extends Screen {
                     BTN_WIDTH,
                     BTN_HEIGHT,
                     Component.literal("Home #" + (i + 1)),
-                    (button, value) -> pendingColors[index] = value.name()
+                    (button, value) -> {
+                        pendingColors[index] = value.name();
+                        iconStacks[index] = safeStack(value);
+                    }
                 );
             this.addRenderableWidget(btn);
         }
@@ -90,8 +100,7 @@ public class ConfigScreen extends Screen {
 
         for (int i = 0; i < rowCount; i++) {
             int rowY = startY + i * ROW_HEIGHT;
-            QuickTriggerConfig.BedColor color = QuickTriggerConfig.BedColor.fromName(pendingColors[i]);
-            graphics.item(new ItemStack(color.item), iconX, rowY + (BTN_HEIGHT - ICON_SIZE) / 2);
+            graphics.item(iconStacks[i], iconX, rowY + (BTN_HEIGHT - ICON_SIZE) / 2);
         }
     }
 
@@ -103,5 +112,14 @@ public class ConfigScreen extends Screen {
     @Override
     public void onClose() {
         this.minecraft.setScreen(parent);
+    }
+
+    private static ItemStack safeStack(QuickTriggerConfig.BedColor color) {
+        try {
+            return new ItemStack(color.item);
+        } catch (NullPointerException e) {
+            // Item components not yet bound (opened from main menu before loading a world)
+            return ItemStack.EMPTY;
+        }
     }
 }
