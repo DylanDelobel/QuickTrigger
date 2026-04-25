@@ -29,6 +29,13 @@ java {
     }
 }
 
+processResources {
+    inputs.property "version", project.mod_version
+    filesMatching("fabric.mod.json") {
+        expand "version": project.mod_version
+    }
+}
+
 jar {
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}" }

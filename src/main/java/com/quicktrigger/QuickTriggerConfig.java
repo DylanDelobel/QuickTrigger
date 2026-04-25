@@ -10,6 +10,9 @@ import net.minecraft.world.item.Items;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class QuickTriggerConfig {
 
@@ -55,8 +58,13 @@ public class QuickTriggerConfig {
         }
     }
 
+    public static final int MAX_NAME_LENGTH = 24;
+
     // Stored as enum names in JSON — 9 slots max
     public String[] bedColors = {"BLUE", "GREEN", "ORANGE", "PURPLE", "RED", "CYAN", "YELLOW", "LIME", "WHITE"};
+
+    // Per-server custom names: key = server IP or "local:<worldName>" — empty string means "Home #N"
+    public Map<String, String[]> serverBedNames = new HashMap<>();
 
     public BedColor getColor(int homeIndex) {
         if (homeIndex < 0 || homeIndex >= bedColors.length) return BedColor.BLUE;
@@ -69,6 +77,10 @@ public class QuickTriggerConfig {
         }
     }
 
+    public String[] getNamesForServer(String serverKey) {
+        return serverBedNames.computeIfAbsent(serverKey, k -> new String[]{"", "", "", "", "", "", "", "", ""});
+    }
+
     public ItemStack getItemStack(int homeIndex) {
         return new ItemStack(getColor(homeIndex).item);
     }
@@ -78,8 +90,28 @@ public class QuickTriggerConfig {
         try {
             String json = Files.readString(CONFIG_PATH);
             QuickTriggerConfig loaded = GSON.fromJson(json, QuickTriggerConfig.class);
-            if (loaded != null && loaded.bedColors != null && loaded.bedColors.length == 4) {
-                this.bedColors = loaded.bedColors;
+            if (loaded != null) {
+                if (loaded.bedColors != null) {
+                    for (int i = 0; i < this.bedColors.length; i++) {
+                        if (i < loaded.bedColors.length && loaded.bedColors[i] != null) {
+                            this.bedColors[i] = loaded.bedColors[i];
+                        }
+                    }
+                }
+                if (loaded.serverBedNames != null) {
+                    for (Map.Entry<String, String[]> entry : loaded.serverBedNames.entrySet()) {
+                        if (entry.getKey() == null || entry.getValue() == null) continue;
+                        String[] normalized = new String[9];
+                        Arrays.fill(normalized, "");
+                        for (int i = 0; i < 9 && i < entry.getValue().length; i++) {
+                            if (entry.getValue()[i] != null) {
+                                String n = entry.getValue()[i].strip();
+                                normalized[i] = n.length() > MAX_NAME_LENGTH ? n.substring(0, MAX_NAME_LENGTH) : n;
+                            }
+                        }
+                        this.serverBedNames.put(entry.getKey(), normalized);
+                    }
+                }
             }
         } catch (IOException e) {
             // Garde les valeurs par défaut si le fichier est illisible

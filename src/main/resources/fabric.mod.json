@@ -1,10 +1,14 @@
 {
   "schemaVersion": 1,
   "id": "quicktrigger",
-  "version": "1.0.0",
+  "version": "${version}",
   "name": "QuickTrigger",
-  "description": "Adds a Spawn button in the inventory that sends /trigger spawn automatically.",
-  "authors": ["You"],
+  "description": "Adds Spawn and Home buttons to the player inventory, compatible with VanillaTweaks Home & Spawn datapacks.",
+  "authors": ["DylanDelobel"],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/quicktrigger",
+    "issues": "https://github.com/DylanDelobel/QuickTrigger/issues"
+  },
   "license": "MIT",
   "icon": "assets/quicktrigger/icon.png",
   "environment": "*",

@@ -22,17 +22,30 @@ public class QuickTriggerClient implements ClientModInitializer {
 
     private static final Gson GSON = new Gson();
 
-    private static final Component[] HOME_TOOLTIPS = {
-        Component.literal("Home #1"),
-        Component.literal("Home #2"),
-        Component.literal("Home #3"),
-        Component.literal("Home #4"),
-        Component.literal("Home #5"),
-        Component.literal("Home #6"),
-        Component.literal("Home #7"),
-        Component.literal("Home #8"),
-        Component.literal("Home #9"),
-    };
+    // Key of the currently connected server/world — package-visible for ConfigScreen
+    static volatile String currentServerKey = null;
+    private static volatile String[] activeNames = new String[9];
+
+    private static String resolveServerKey(net.minecraft.client.Minecraft client) {
+        net.minecraft.client.multiplayer.ServerData server = client.getCurrentServer();
+        if (server != null) return server.ip;
+        try {
+            if (client.getSingleplayerServer() != null) {
+                String name = client.getSingleplayerServer().getWorldData().getLevelName();
+                if (name != null && !name.isBlank()) return "local:" + name;
+            }
+        } catch (Exception ignored) {}
+        return "local";
+    }
+
+    private static Component homeTooltip(int index) {
+        String[] names = activeNames;
+        if (names != null && index < names.length) {
+            String custom = names[index];
+            if (custom != null && !custom.isBlank()) return Component.literal(custom);
+        }
+        return Component.literal("Home #" + (index + 1));
+    }
 
     // État reçu du serveur (package-visible pour ConfigScreen)
     static volatile boolean serverHasMod = false;
@@ -62,11 +75,18 @@ public class QuickTriggerClient implements ClientModInitializer {
             }
         );
 
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            currentServerKey = resolveServerKey(client);
+            activeNames = QuickTriggerConfig.INSTANCE.getNamesForServer(currentServerKey);
+        });
+
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             serverHasMod = false;
             playerLimit = 1;
             maxHomes = 1;
             lockMessages = new String[8];
+            currentServerKey = null;
+            activeNames = new String[9];
         });
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
@@ -91,7 +111,7 @@ public class QuickTriggerClient implements ClientModInitializer {
             Screens.getWidgets(screen).add(new ItemButton(
                 bgX + 26, bgY - 20,
                 QuickTriggerConfig.INSTANCE.getItemStack(0),
-                HOME_TOOLTIPS[0],
+                homeTooltip(0),
                 () -> {
                     client.setScreen(null);
                     if (client.getConnection() != null)
@@ -116,7 +136,7 @@ public class QuickTriggerClient implements ClientModInitializer {
 
                 Component tooltip;
                 if (available) {
-                    tooltip = index < HOME_TOOLTIPS.length ? HOME_TOOLTIPS[index] : Component.literal("Home #" + (index + 1));
+                    tooltip = homeTooltip(index);
                 } else {
                     // index 1 → msgs[0], index 2 → msgs[1], …
                     int msgIdx = index - 1;

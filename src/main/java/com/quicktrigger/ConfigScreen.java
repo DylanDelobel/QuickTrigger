@@ -3,22 +3,26 @@ package com.quicktrigger;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 public class ConfigScreen extends Screen {
 
-    private static final int ROW_HEIGHT = 24;
-    private static final int BTN_WIDTH  = 160;
-    private static final int BTN_HEIGHT = 20;
-    private static final int GAP        = 6;
-    private static final int ICON_SIZE  = 16;
-    // button + gap + icon preview
-    private static final int TOTAL_WIDTH = BTN_WIDTH + GAP + ICON_SIZE;
+    private static final int ROW_HEIGHT  = 24;
+    private static final int BTN_WIDTH   = 90;   // cycle button couleur
+    private static final int NAME_WIDTH  = 110;  // EditBox nom custom
+    private static final int BTN_HEIGHT  = 20;
+    private static final int GAP         = 6;
+    private static final int ICON_SIZE   = 16;
+    // color button + gap + name field + gap + icon preview
+    private static final int TOTAL_WIDTH = BTN_WIDTH + GAP + NAME_WIDTH + GAP + ICON_SIZE;
 
     private final Screen parent;
     private final String[] pendingColors = new String[9];
+    private final String[] pendingNames  = new String[9];
+    private EditBox[] nameFields;
 
     // Calculated in init(), reused in render()
     private int blockStartX;
@@ -31,6 +35,8 @@ public class ConfigScreen extends Screen {
         super(Component.literal("QuickTrigger — Configuration"));
         this.parent = parent;
         System.arraycopy(QuickTriggerConfig.INSTANCE.bedColors, 0, pendingColors, 0, 9);
+        String serverKey = QuickTriggerClient.currentServerKey != null ? QuickTriggerClient.currentServerKey : "offline";
+        System.arraycopy(QuickTriggerConfig.INSTANCE.getNamesForServer(serverKey), 0, pendingNames, 0, 9);
     }
 
     @Override
@@ -40,7 +46,8 @@ public class ConfigScreen extends Screen {
         blockStartX = centerX - TOTAL_WIDTH / 2;
         startY = this.height / 2 - (rowCount * ROW_HEIGHT) / 2 - 20;
 
-        iconStacks = new ItemStack[rowCount];
+        iconStacks  = new ItemStack[rowCount];
+        nameFields  = new EditBox[rowCount];
         for (int i = 0; i < rowCount; i++) {
             iconStacks[i] = safeStack(QuickTriggerConfig.BedColor.fromName(pendingColors[i]));
         }
@@ -65,6 +72,22 @@ public class ConfigScreen extends Screen {
                     }
                 );
             this.addRenderableWidget(btn);
+
+            EditBox nameField = new EditBox(
+                this.font,
+                blockStartX + BTN_WIDTH + GAP,
+                startY + i * ROW_HEIGHT,
+                NAME_WIDTH,
+                BTN_HEIGHT,
+                Component.literal("Nom du home #" + (i + 1))
+            );
+            nameField.setMaxLength(QuickTriggerConfig.MAX_NAME_LENGTH);
+            nameField.setValue(pendingNames[i] == null ? "" : pendingNames[i]);
+            nameField.setHint(Component.literal("Home #" + (i + 1)));
+            final int nameIndex = i;
+            nameField.setResponder(value -> pendingNames[nameIndex] = value);
+            this.addRenderableWidget(nameField);
+            nameFields[i] = nameField;
         }
 
         int bottomY = startY + rowCount * ROW_HEIGHT + 8;
@@ -74,6 +97,9 @@ public class ConfigScreen extends Screen {
             Component.literal("Sauvegarder"),
             btn -> {
                 System.arraycopy(pendingColors, 0, QuickTriggerConfig.INSTANCE.bedColors, 0, 9);
+                String key = QuickTriggerClient.currentServerKey != null ? QuickTriggerClient.currentServerKey : "offline";
+                String[] stored = QuickTriggerConfig.INSTANCE.getNamesForServer(key);
+                System.arraycopy(pendingNames, 0, stored, 0, 9);
                 QuickTriggerConfig.INSTANCE.save();
                 this.minecraft.setScreen(parent);
             })
@@ -96,7 +122,7 @@ public class ConfigScreen extends Screen {
         super.extractRenderState(graphics, mouseX, mouseY, delta);
         graphics.centeredText(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
 
-        int iconX = blockStartX + BTN_WIDTH + GAP;
+        int iconX = blockStartX + BTN_WIDTH + GAP + NAME_WIDTH + GAP;
 
         for (int i = 0; i < rowCount; i++) {
             int rowY = startY + i * ROW_HEIGHT;

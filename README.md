@@ -16,8 +16,13 @@ Up to **9 homes** accessible with a single click, displayed above the inventory.
 - **Locked slots** — gray bed with a tooltip message configurable by the server admin
 - **No server mod** — only Home #1 is shown (no gray beds)
 
-### Color Configuration (Mod Menu)
-If [Mod Menu](https://modrinth.com/mod/modmenu) is installed, a **Config** button appears on QuickTrigger's entry. It opens a screen where each player can choose the bed color for each of their home slots. Colors are saved client-side in `config/quicktrigger.json`.
+### Configuration (Mod Menu)
+If [Mod Menu](https://modrinth.com/mod/modmenu) is installed, a **Config** button appears on QuickTrigger's entry. It opens a screen where each player can:
+
+- Choose the **bed color** for each home slot (16 vanilla colors, displayed in the player's language)
+- Set a **custom name** for each home slot (up to 24 characters) — shown on hover instead of "Home #N"
+
+Names and colors are saved client-side per server/world in `config/quicktrigger.json`.
 
 ---
 
@@ -89,12 +94,25 @@ The server reads each player's personal limit from the scoreboard on join and se
 
 ## Client Configuration
 
-Each player can choose a bed color per home slot via **Mod Menu → QuickTrigger → Config**.
+Each player can configure colors and custom names per home slot via **Mod Menu → QuickTrigger → Config**.
 
 - Config saved in `.minecraft/config/quicktrigger.json`
 - 16 available colors (all vanilla Minecraft bed colors)
-- Color names are displayed in the player's game language
+- Custom name up to **24 characters** — replaces "Home #N" in the hover tooltip
+- Names and colors are stored **per server/world** — each server has its own independent set
 - The config screen shows exactly as many rows as `maxHomes` from the server (or 1 if offline)
+
+The JSON structure for custom names:
+
+```json
+{
+  "bedColors": ["BLUE", "GREEN", "..."],
+  "serverBedNames": {
+    "play.monserveur.net": ["Maison", "Farm", "", "", "", "", "", "", ""],
+    "local:MaSurvie":      ["Base principale", "", "", "", "", "", "", "", ""]
+  }
+}
+```
 
 ---
 
