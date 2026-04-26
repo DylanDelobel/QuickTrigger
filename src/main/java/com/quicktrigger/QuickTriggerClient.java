@@ -26,15 +26,27 @@ public class QuickTriggerClient implements ClientModInitializer {
     static volatile String currentServerKey = null;
     private static volatile String[] activeNames = new String[9];
 
-    private static String resolveServerKey(net.minecraft.client.Minecraft client) {
-        net.minecraft.client.multiplayer.ServerData server = client.getCurrentServer();
-        if (server != null) return server.ip;
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger("quicktrigger");
+
+    private static String resolveServerKey(net.minecraft.client.multiplayer.ClientPacketListener handler,
+                                           net.minecraft.client.Minecraft client) {
+        // Prefer handler.getServerData() — guaranteed populated at JOIN time on the network thread
+        net.minecraft.client.multiplayer.ServerData data = handler.getServerData();
+        if (data != null && data.ip != null && !data.ip.isBlank()) {
+            LOGGER.info("[QuickTrigger] Server key: {}", data.ip);
+            return data.ip;
+        }
+        // Fallback: singleplayer world name
         try {
             if (client.getSingleplayerServer() != null) {
                 String name = client.getSingleplayerServer().getWorldData().getLevelName();
-                if (name != null && !name.isBlank()) return "local:" + name;
+                if (name != null && !name.isBlank()) {
+                    LOGGER.info("[QuickTrigger] Solo key: local:{}", name);
+                    return "local:" + name;
+                }
             }
         } catch (Exception ignored) {}
+        LOGGER.warn("[QuickTrigger] Could not resolve server key, using 'local'");
         return "local";
     }
 
@@ -76,7 +88,7 @@ public class QuickTriggerClient implements ClientModInitializer {
         );
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            currentServerKey = resolveServerKey(client);
+            currentServerKey = resolveServerKey(handler, client);
             activeNames = QuickTriggerConfig.INSTANCE.getNamesForServer(currentServerKey);
         });
 
