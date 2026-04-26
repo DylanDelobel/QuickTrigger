@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2] - 2026-04-26
+
+### Changed
+- Updated mod author name in metadata.
+
+---
+
 ## [1.1.1] - 2026-04-26
 
 ### Fixed

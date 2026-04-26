@@ -4,7 +4,7 @@
   "version": "${version}",
   "name": "QuickTrigger",
   "description": "Adds Spawn and Home buttons to the player inventory, compatible with VanillaTweaks Home & Spawn datapacks.",
-  "authors": ["DylanDelobel"],
+  "authors": ["Sovex66"],
   "contact": {
     "homepage": "https://modrinth.com/mod/quicktrigger",
     "issues": "https://github.com/DylanDelobel/QuickTrigger/issues"
