@@ -1,0 +1,22 @@
+modLoader = "javafml"
+loaderVersion = "[2,)"
+license = "MIT"
+
+[[mods]]
+modId = "quicktrigger"
+version = "${version}"
+displayName = "QuickTrigger"
+description = "Adds Spawn and Home buttons to the player inventory, compatible with VanillaTweaks Home & Spawn datapacks."
+logoFile = "assets/quicktrigger/icon.png"
+
+[[dependencies.quicktrigger]]
+modId = "neoforge"
+type = "required"
+versionRange = "[26.1.2.0,)"
+side = "BOTH"
+
+[[dependencies.quicktrigger]]
+modId = "minecraft"
+type = "required"
+versionRange = "[26.1.2,)"
+side = "BOTH"

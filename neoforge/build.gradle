@@ -1,0 +1,39 @@
+plugins {
+    id 'net.neoforged.moddev' version '2.0.141'
+    id 'maven-publish'
+}
+
+version = "${project.mod_version}-${project.minecraft_version}"
+group = project.maven_group
+
+base {
+    archivesName = "${project.archives_base_name}-neoforge"
+}
+
+neoForge {
+    version = project.neoforge_version
+}
+
+dependencies {
+    implementation project(path: ":common", configuration: "namedElements")
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    inputs.property 'version', project.mod_version
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand version: project.mod_version
+    }
+}
+
+jar {
+    from project(':common').sourceSets.main.output
+    from("../LICENSE") {
+        rename { "${it}_${project.archives_base_name}" }
+    }
+}

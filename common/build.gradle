@@ -1,0 +1,30 @@
+plugins {
+    id 'fabric-loom' version '1.15-SNAPSHOT'
+}
+
+version = "${project.mod_version}-${project.minecraft_version}"
+group = project.maven_group
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    compileOnly "net.fabricmc:fabric-loader:${project.loader_version}"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    withSourcesJar()
+}
+
+// Expose compiled classes to fabric/neoforge subprojects
+configurations {
+    namedElements {
+        canBeConsumed = true
+        canBeResolved = false
+    }
+}
+
+artifacts {
+    namedElements(jar)
+}

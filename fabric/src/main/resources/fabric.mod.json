@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "quicktrigger",
+  "version": "${version}",
+  "name": "QuickTrigger",
+  "description": "Adds Spawn and Home buttons to the player inventory, compatible with VanillaTweaks Home & Spawn datapacks.",
+  "authors": ["Sovex66"],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/quicktrigger",
+    "issues": "https://github.com/DylanDelobel/QuickTrigger/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/quicktrigger/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.quicktrigger.QuickTrigger"
+    ],
+    "client": [
+      "com.quicktrigger.QuickTriggerClient"
+    ],
+    "modmenu": [
+      "com.quicktrigger.ModMenuIntegration"
+    ]
+  },
+  "suggests": {
+    "modmenu": "*"
+  },
+  "depends": {
+    "fabricloader": ">=0.18.6",
+    "fabric-api": "*",
+    "minecraft": "~26.1",
+    "java": ">=21"
+  }
+}
