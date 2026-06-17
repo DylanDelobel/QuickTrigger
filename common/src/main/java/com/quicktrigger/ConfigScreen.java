@@ -98,7 +98,7 @@ public class ConfigScreen extends Screen {
                 String[] stored = QuickTriggerConfig.INSTANCE.getNamesForServer(key);
                 System.arraycopy(pendingNames, 0, stored, 0, 9);
                 QuickTriggerConfig.INSTANCE.save();
-                this.minecraft.setScreen(parent);
+                this.minecraft.setScreenAndShow(parent);
             })
             .pos(blockStartX, bottomY)
             .size(halfBtn, BTN_HEIGHT)
@@ -107,7 +107,7 @@ public class ConfigScreen extends Screen {
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Annuler"),
-            btn -> this.minecraft.setScreen(parent))
+            btn -> this.minecraft.setScreenAndShow(parent))
             .pos(blockStartX + halfBtn + GAP, bottomY)
             .size(halfBtn, BTN_HEIGHT)
             .build()
@@ -134,7 +134,7 @@ public class ConfigScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(parent);
+        this.minecraft.setScreenAndShow(parent);
     }
 
     private static ItemStack safeStack(QuickTriggerConfig.BedColor color) {

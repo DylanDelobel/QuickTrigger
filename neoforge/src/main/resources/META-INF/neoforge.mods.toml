@@ -12,11 +12,11 @@ logoFile = "assets/quicktrigger/icon.png"
 [[dependencies.quicktrigger]]
 modId = "neoforge"
 type = "required"
-versionRange = "[26.1.2.0,)"
+versionRange = "[26.2.0.0,)"
 side = "BOTH"
 
 [[dependencies.quicktrigger]]
 modId = "minecraft"
 type = "required"
-versionRange = "[26.1.2,)"
+versionRange = "[26.2,)"
 side = "BOTH"

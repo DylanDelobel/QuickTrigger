@@ -2,6 +2,7 @@ package com.quicktrigger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -25,27 +26,27 @@ public class QuickTriggerConfig {
     }
 
     public enum BedColor {
-        WHITE(Items.WHITE_BED),
-        ORANGE(Items.ORANGE_BED),
-        MAGENTA(Items.MAGENTA_BED),
-        LIGHT_BLUE(Items.LIGHT_BLUE_BED),
-        YELLOW(Items.YELLOW_BED),
-        LIME(Items.LIME_BED),
-        PINK(Items.PINK_BED),
-        GRAY(Items.GRAY_BED),
-        LIGHT_GRAY(Items.LIGHT_GRAY_BED),
-        CYAN(Items.CYAN_BED),
-        PURPLE(Items.PURPLE_BED),
-        BLUE(Items.BLUE_BED),
-        BROWN(Items.BROWN_BED),
-        GREEN(Items.GREEN_BED),
-        RED(Items.RED_BED),
-        BLACK(Items.BLACK_BED);
+        WHITE(DyeColor.WHITE),
+        ORANGE(DyeColor.ORANGE),
+        MAGENTA(DyeColor.MAGENTA),
+        LIGHT_BLUE(DyeColor.LIGHT_BLUE),
+        YELLOW(DyeColor.YELLOW),
+        LIME(DyeColor.LIME),
+        PINK(DyeColor.PINK),
+        GRAY(DyeColor.GRAY),
+        LIGHT_GRAY(DyeColor.LIGHT_GRAY),
+        CYAN(DyeColor.CYAN),
+        PURPLE(DyeColor.PURPLE),
+        BLUE(DyeColor.BLUE),
+        BROWN(DyeColor.BROWN),
+        GREEN(DyeColor.GREEN),
+        RED(DyeColor.RED),
+        BLACK(DyeColor.BLACK);
 
         public final Item item;
 
-        BedColor(Item item) {
-            this.item = item;
+        BedColor(DyeColor dyeColor) {
+            this.item = Items.BED.pick(dyeColor);
         }
 
         public static BedColor fromName(String name) {

@@ -105,7 +105,7 @@ public class QuickTriggerClient implements ClientModInitializer {
                 new ItemStack(Items.COMPASS),
                 Component.literal("Spawn"),
                 () -> {
-                    client.setScreen(null);
+                    client.setScreenAndShow(null);
                     if (client.getConnection() != null)
                         client.getConnection().sendCommand("trigger spawn");
                 }
@@ -116,7 +116,7 @@ public class QuickTriggerClient implements ClientModInitializer {
                 QuickTriggerConfig.INSTANCE.getItemStack(0),
                 homeTooltip(0),
                 () -> {
-                    client.setScreen(null);
+                    client.setScreenAndShow(null);
                     if (client.getConnection() != null)
                         client.getConnection().sendCommand("trigger home");
                 }
@@ -134,7 +134,7 @@ public class QuickTriggerClient implements ClientModInitializer {
 
                 ItemStack icon = available
                     ? QuickTriggerConfig.INSTANCE.getItemStack(index)
-                    : new ItemStack(Items.GRAY_BED);
+                    : new ItemStack(Items.BED.pick(net.minecraft.world.item.DyeColor.GRAY));
 
                 Component tooltip;
                 if (available) {
@@ -147,7 +147,7 @@ public class QuickTriggerClient implements ClientModInitializer {
                 }
 
                 Runnable action = available ? () -> {
-                    client.setScreen(null);
+                    client.setScreenAndShow(null);
                     if (client.getConnection() != null)
                         client.getConnection().sendCommand("trigger home set " + (index + 1));
                 } : null;

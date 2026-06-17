@@ -98,7 +98,7 @@ public class ClientEventHandler {
             new ItemStack(Items.COMPASS),
             Component.literal("Spawn"),
             () -> {
-                client.setScreen(null);
+                client.setScreenAndShow(null);
                 if (client.getConnection() != null)
                     client.getConnection().sendCommand("trigger spawn");
             }
@@ -109,7 +109,7 @@ public class ClientEventHandler {
             QuickTriggerConfig.INSTANCE.getItemStack(0),
             homeTooltip(0),
             () -> {
-                client.setScreen(null);
+                client.setScreenAndShow(null);
                 if (client.getConnection() != null)
                     client.getConnection().sendCommand("trigger home");
             }
@@ -127,7 +127,7 @@ public class ClientEventHandler {
 
             ItemStack icon = available
                 ? QuickTriggerConfig.INSTANCE.getItemStack(index)
-                : new ItemStack(Items.GRAY_BED);
+                : new ItemStack(Items.BED.pick(net.minecraft.world.item.DyeColor.GRAY));
 
             Component tooltip;
             if (available) {
@@ -140,7 +140,7 @@ public class ClientEventHandler {
             }
 
             Runnable action = available ? () -> {
-                client.setScreen(null);
+                client.setScreenAndShow(null);
                 if (client.getConnection() != null)
                     client.getConnection().sendCommand("trigger home set " + (index + 1));
             } : null;
