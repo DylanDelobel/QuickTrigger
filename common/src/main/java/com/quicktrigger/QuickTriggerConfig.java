@@ -9,19 +9,25 @@ import net.minecraft.world.item.Items;
 
 import java.io.IOException;
 import java.nio.file.Files;
+
+
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QuickTriggerConfig {
 
-    public static final QuickTriggerConfig INSTANCE = new QuickTriggerConfig();
+// client side config, bed colors are global but names are per server
+public class QuickTriggerConfig{
+
+    public static final QuickTriggerConfig INSTANCE =new QuickTriggerConfig();
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static Path CONFIG_PATH;
 
     public static void init(ConfigDirProvider provider) {
+
+
         CONFIG_PATH = provider.getConfigDir().resolve("quicktrigger.json");
     }
 
@@ -45,87 +51,100 @@ public class QuickTriggerConfig {
 
         public final Item item;
 
-        BedColor(DyeColor dyeColor) {
-            this.item = Items.BED.pick(dyeColor);
+        BedColor(DyeColor dye) {
+
+
+            this.item = Items.BED.pick(dye);
         }
 
+        //case insensitive, anything unknown falls back to blue
         public static BedColor fromName(String name) {
-            for (BedColor c : values()) {
+            for (BedColor c : values()){
                 if (c.name().equalsIgnoreCase(name)) return c;
             }
             return BLUE;
         }
 
+
         @Override
-        public String toString() {
+        public String toString(){
             return name();
         }
     }
 
-    public static final int MAX_NAME_LENGTH = 24;
+    public static final int MAX_NAME_LENGTH =24;
 
-    public String[] bedColors = {"BLUE", "GREEN", "ORANGE", "PURPLE", "RED", "CYAN", "YELLOW", "LIME", "WHITE"};
+    //saved as strings so a renamed enum doesnt nuke peoples config
+    public String[]bedColors={"BLUE", "GREEN", "ORANGE","PURPLE","RED","CYAN","YELLOW","LIME","WHITE"};
 
-    public Map<String, String[]> serverBedNames = new HashMap<>();
+    public Map<String, String[]> serverBedNames = new HashMap<>(); // server ip / "local:<world>" -> 9 names
 
-    public BedColor getColor(int homeIndex) {
-        if (homeIndex < 0 || homeIndex >= bedColors.length) return BedColor.BLUE;
-        return BedColor.fromName(bedColors[homeIndex]);
+    public BedColor getColor(int slot) {
+        if (slot < 0 || slot >= bedColors.length) return BedColor.BLUE;
+        return BedColor.fromName(bedColors[slot]);
     }
 
-    public void setColor(int homeIndex, BedColor color) {
-        if (homeIndex >= 0 && homeIndex < bedColors.length) {
-            bedColors[homeIndex] = color.name();
+    public void setColor(int slot, BedColor color) {
+        if(slot >= 0 && slot < bedColors.length){
+            bedColors[slot] = color.name();
         }
     }
 
+    // returns the live array, callers write into it directly
     public String[] getNamesForServer(String serverKey) {
-        return serverBedNames.computeIfAbsent(serverKey, k -> new String[]{"", "", "", "", "", "", "", "", ""});
+        return serverBedNames.computeIfAbsent(serverKey, k -> new String[]{"", "", "","", "","", "", "",""});
     }
 
-    public ItemStack getItemStack(int homeIndex) {
-        return new ItemStack(getColor(homeIndex).item);
+    public ItemStack getItemStack(int slot) {
+
+
+        return new ItemStack(getColor(slot).item);
     }
 
-    public void load() {
+    public void load(){
         if (CONFIG_PATH == null || !Files.exists(CONFIG_PATH)) return;
-        try {
-            String json = Files.readString(CONFIG_PATH);
-            QuickTriggerConfig loaded = GSON.fromJson(json, QuickTriggerConfig.class);
-            if (loaded != null) {
-                if (loaded.bedColors != null) {
-                    for (int i = 0; i < this.bedColors.length; i++) {
-                        if (i < loaded.bedColors.length && loaded.bedColors[i] != null) {
-                            this.bedColors[i] = loaded.bedColors[i];
-                        }
-                    }
-                }
-                if (loaded.serverBedNames != null) {
-                    for (Map.Entry<String, String[]> entry : loaded.serverBedNames.entrySet()) {
-                        if (entry.getKey() == null || entry.getValue() == null) continue;
-                        String[] normalized = new String[9];
-                        Arrays.fill(normalized, "");
-                        for (int i = 0; i < 9 && i < entry.getValue().length; i++) {
-                            if (entry.getValue()[i] != null) {
-                                String n = entry.getValue()[i].strip();
-                                normalized[i] = n.length() > MAX_NAME_LENGTH ? n.substring(0, MAX_NAME_LENGTH) : n;
-                            }
-                        }
-                        this.serverBedNames.put(entry.getKey(), normalized);
+        try{
+            QuickTriggerConfig loaded =GSON.fromJson(Files.readString(CONFIG_PATH),QuickTriggerConfig.class);
+            if (loaded == null)return;
+
+            // copy over slot by slot so an old/short file still keeps the defaults for the rest
+            if (loaded.bedColors != null) {
+                for (int i =0;i < bedColors.length;i++){
+                    if(i < loaded.bedColors.length && loaded.bedColors[i]!= null){
+                        bedColors[i] = loaded.bedColors[i];
                     }
                 }
             }
-        } catch (IOException e) {
-            // keep defaults
+
+
+
+            if(loaded.serverBedNames != null){
+                for(Map.Entry<String, String[]> e : loaded.serverBedNames.entrySet()){
+                    String[] names=e.getValue();
+                    if (e.getKey() == null || names == null) continue;
+
+                    String[] fixed = new String[9];
+                    Arrays.fill(fixed,"");
+                    for(int i=0; i < 9 && i < names.length;i++){
+                        if(names[i] == null)continue;
+                        String n =names[i].strip();
+                        fixed[i] = n.length() > MAX_NAME_LENGTH ? n.substring(0, MAX_NAME_LENGTH) : n; // someone hand edited the json
+                    }
+                    serverBedNames.put(e.getKey(),fixed);
+                }
+            }
+        }catch (IOException e) {
+            //keep defaults
         }
     }
 
     public void save() {
         if (CONFIG_PATH == null) return;
-        try {
-            Files.writeString(CONFIG_PATH, GSON.toJson(this));
+
+        try{
+            Files.writeString(CONFIG_PATH,GSON.toJson(this));
         } catch (IOException e) {
-            // silent failure
+            // meh, worst case they lose a color change
         }
     }
 }
