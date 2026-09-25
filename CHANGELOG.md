@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.3.0] - 2026-09-25
+
+### Changed
+- Updated for Minecraft 26.3 (Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, NeoForge 26.3.0.16-beta, Mod Menu 21.0.0).
+- New mod icon.
+- Internal code cleanup and light restructuring to match my other Minecraft mods. No gameplay change.
+
+---
+
+## [1.2.0] - 2026-06-17
+
+### Added
+- **NeoForge support**: the project is now split into `common`, `fabric` and `neoforge` modules, and each loader gets its own jar.
+
+### Changed
+- Updated for Minecraft 26.2 (Fabric Loader 0.19.3, Fabric API 0.152.1+26.2, NeoForge 26.2.0.1-beta, Mod Menu 20.0.0-beta.2).
+
+### Fixed
+- Mod icon not showing in Mod Menu (the file was a JPEG with a `.png` extension).
+
+---
+
 ## [1.1.2] - 2026-04-26
 
 ### Changed
