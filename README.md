@@ -1,65 +1,62 @@
 # QuickTrigger
 
-Adds a **Spawn** button and up to **9 Home** buttons directly in your Minecraft inventory.  
-Works with the [VanillaTweaks](https://vanillatweaks.net/) Homes & Spawn datapacks.
+QuickTrigger adds **Spawn and Home buttons directly to your inventory**
 
----
+so you don't have to type `/trigger spawn` or `/trigger home` every time you want to teleport.
 
-## What it does
+It's made to work with the [VanillaTweaks](https://vanillatweaks.net/) Homes and Spawn datapacks.
 
-When you open your inventory, you'll see buttons above it:
+## Features
 
-- **Spawn** — teleports you to spawn instantly
-- **Home #1 to #9** — teleports you to the corresponding home
+Open your inventory and you'll find a **Spawn** button along with up to **9 Home slots**.
 
-No commands to type, no chat to open. One click and you're there.
+Clicking one simply runs the corresponding trigger for you.
 
----
+Homes can be customized with a name and a bed color, making it easier to remember which home goes where.
 
-## Requirements
-
-- Minecraft **1.21.11** with [Fabric Loader](https://fabricmc.net/) and [Fabric API](https://modrinth.com/mod/fabric-api)
-- The **VanillaTweaks Homes & Spawn datapacks** installed on the server
-- *(Optional)* [Mod Menu](https://modrinth.com/mod/modmenu) — enables the settings screen
-
----
+The mod works client-side, so you can use it on a compatible server without requiring other players to install anything.
 
 ## Installation
 
-Drop `quicktrigger-x.x.x.jar` into your `mods/` folder. That's it.
+Download the `.jar` and put it in your `mods` folder.
 
-> Players without the mod can still join and play normally — they just won't see the buttons.
+QuickTrigger supports **Fabric and NeoForge**.
 
----
+If you're only using the client mod, you'll have access to Spawn and one Home slot.
+
+Other players don't need QuickTrigger installed.
 
 ## Customization
 
-If you have [Mod Menu](https://modrinth.com/mod/modmenu) installed, open **Mods → QuickTrigger → Config** to:
+If you have [Mod Menu](https://modrinth.com/mod/modmenu) installed, go to:
 
-- Change the **bed color** of each home button (all 16 vanilla colors)
-- Give each home a **custom name** — shown when you hover over the button
+**Mods → QuickTrigger → Config**
 
-Colors and names are saved per server and per singleplayer world, so each save has its own setup.
+From there, you can:
 
----
+- Change the bed color for each home
+- Give your homes custom names
 
-## For server admins
+These settings are saved separately for each server and singleplayer world.
 
-Install the same `.jar` on your Fabric server to unlock the full feature set:
+## Server support
 
-- Set a **maximum number of home slots** visible to all players (up to 9)
-- Control **how many slots each player can use** via a scoreboard
-- Customize the **tooltip** on locked slots
+QuickTrigger can optionally be installed on the server as well.
 
-The config file (`config/quicktrigger-server.json`) is generated automatically on first launch.  
-See [TECHNICAL.md](TECHNICAL.md) for the full setup details.
+This isn't required, but it gives server admins a few additional options:
 
----
+- Choose how many Home slots are displayed
+- Control how many Home slots each player can use
+- Customize the tooltip shown for locked slots
+
+The server config is generated automatically on first launch.
+
+More information about the server-side configuration is available in [TECHNICAL.md](https://github.com/DylanDelobel/QuickTrigger/blob/master/TECHNICAL.md).
 
 ## Compatibility
 
-| Situation | Works? |
-|-----------|--------|
-| Client only (no server mod) | Yes — Spawn + 1 Home |
-| Client + server mod | Yes — full feature set |
-| Vanilla client on a modded server | Yes — mod is ignored |
+| Setup | Support |
+| --- | --- |
+| Client only | Spawn + 1 Home |
+| Client + server | Full feature set |
+| Vanilla client + modded server | Works normally; QuickTrigger features are simply unavailable |
